@@ -258,8 +258,9 @@ def start():
                 f"The student just uploaded their project. Ask your opening Socratic question based on this specific project."
             )
 
+        language = request.args.get('language', 'en')
         from socratic_turn1 import run as ask
-        response = ask(summary, low_dims, scores)
+        response = ask(summary, low_dims, scores, language=language)
         return jsonify({'ai_response': response, 'tokens_remaining': tokens_remaining}), 200
     except Exception as e:
         print(f"ERROR in start: {e}")
@@ -275,6 +276,7 @@ def chat():
 
         data = request.get_json()
         user_question = data.get('question', '')
+        language = data.get('language', 'en')
 
         if not user_question:
             return jsonify({'error': 'No question provided'}), 400
@@ -308,7 +310,7 @@ def chat():
                     f"Wrap up the conversation. Tell them specifically what blocks to add to fix each low dimension."
                 )
 
-                final_msg = socratic_response(summary, low_dims, scores, final=True)
+                final_msg = socratic_response(summary, low_dims, scores, final=True, language=language)
                 return jsonify({
                     'ai_response': final_msg,
                     'tokens_remaining': 0,
@@ -347,7 +349,7 @@ def chat():
 
         try:
             from socratic_turn1 import run as socratic_response
-            ai_response = socratic_response(summary, low_dims, scores, final=is_last)
+            ai_response = socratic_response(summary, low_dims, scores, final=is_last, language=language)
         except Exception as e:
             print(f"ERROR calling Gemini: {e}")
             ai_response = "Oops, something went wrong on our end. Please try sending your message again."

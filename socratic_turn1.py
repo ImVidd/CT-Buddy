@@ -16,10 +16,12 @@ DIM_HINTS = {
     'Math Operators': "numbers and calculations — adding, comparing, using formulas in the project",
 }
 
-def build_prompt(summary, low_dims, scores, final=False):
+def build_prompt(summary, low_dims, scores, final=False, language='en'):
     score_text = '\n'.join([f'  {k}: {v}/4' for k, v in scores.items()])
     dims_text = ', '.join(low_dims)
     hints = '\n'.join([f'  - {d}: think about {DIM_HINTS.get(d, d)}' for d in low_dims])
+
+    lang_instruction = "Respond in Spanish." if language == 'es' else "Respond in English."
 
     if final:
         return f"""You are CT-Buddy, a Socratic tutor wrapping up a conversation with a student about their Scratch project.
@@ -35,6 +37,8 @@ Project info:
 
 Dr. Scratch scores:
 {score_text}
+
+{lang_instruction}
 """
 
     return f"""You are CT-Buddy, a Socratic tutor helping a school student improve their Scratch project.
@@ -60,10 +64,12 @@ Project info:
 
 Dr. Scratch scores:
 {score_text}
+
+{lang_instruction}
 """
 
-def run(summary, low_dims, scores, final=False):
-    prompt = build_prompt(summary, low_dims, scores, final=final)
+def run(summary, low_dims, scores, final=False, language='en'):
+    prompt = build_prompt(summary, low_dims, scores, final=final, language=language)
 
     response = client.models.generate_content(
         model='gemini-2.5-flash',

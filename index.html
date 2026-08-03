@@ -244,8 +244,18 @@
             <div style="font-size:12px; color:#555; margin-top:6px;">Session ID: <strong id="sessionId"></strong></div>
         </div>
 
+        <!-- ##### LANGUAGE PICKER ##### -->
+        <div id="langPicker" style="text-align:center; padding:40px 0;">
+            <div style="font-size:15px; font-weight:600; margin-bottom:20px;">Select your language / Selecciona tu idioma</div>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button onclick="setLanguage('en')" style="font-size:14px; padding:10px 24px;">English</button>
+                <button onclick="setLanguage('es')" style="font-size:14px; padding:10px 24px;">Español</button>
+            </div>
+        </div>
+        <!-- END LANGUAGE PICKER -->
+
         <!-- ##### LOBBY SCREEN ##### -->
-        <div id="lobby" style="padding:8px 0;">
+        <div id="lobby" style="display:none; padding:8px 0;">
             <div style="font-size:15px; font-weight:600; margin-bottom:16px;">Welcome to CT-Buddy!</div>
             <div style="font-size:13px; color:#444; margin-bottom:20px;">Follow these steps to get started:</div>
             <ol style="font-size:13px; color:#444; line-height:2; padding-left:20px; margin:0 0 24px 0;">
@@ -309,6 +319,14 @@
         const sessionId = String(Math.floor(100000 + Math.random() * 900000));
         document.getElementById('sessionId').textContent = sessionId;
 
+        let selectedLanguage = 'en';
+
+        function setLanguage(lang) {
+            selectedLanguage = lang;
+            document.getElementById('langPicker').style.display = 'none';
+            document.getElementById('lobby').style.display = 'block';
+        }
+
         function downloadProject() {
             window.location.href = `${API}/get-project`;
             document.getElementById('readySection').style.display = 'block';
@@ -364,7 +382,7 @@
                     document.getElementById('loading').textContent = 'CT-Buddy is reviewing your project...';
 
                     try {
-                        const r = await fetch(`${API}/start`);
+                        const r = await fetch(`${API}/start?language=${selectedLanguage}`);
                         const d = await r.json();
                         document.getElementById('loading').textContent = '';
                         document.getElementById('chat').classList.add('active');
@@ -418,7 +436,7 @@
             document.getElementById('sendBtn').disabled = true;
             document.getElementById('loading').textContent = 'CT-Buddy is reviewing your project...';
             try {
-                const r = await fetch(`${API}/start`);
+                const r = await fetch(`${API}/start?language=${selectedLanguage}`);
                 const d = await r.json();
                 document.getElementById('loading').textContent = '';
                 document.getElementById('chat').classList.add('active');
@@ -506,7 +524,7 @@
                 const r = await fetch(`${API}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: txt })
+                    body: JSON.stringify({ question: txt, language: selectedLanguage })
                 });
                 const d = await r.json();
                 addMsg('ai', d.ai_response);
@@ -631,7 +649,7 @@
                 document.getElementById('messages').appendChild(loadingMsg);
                 document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
                 try {
-                    const r = await fetch(`${API}/start`);
+                    const r = await fetch(`${API}/start?language=${selectedLanguage}`);
                     const d = await r.json();
                     loadingMsg.remove();
                     document.getElementById('input').disabled = false;
