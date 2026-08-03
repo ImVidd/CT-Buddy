@@ -301,10 +301,12 @@
                 <button onclick="send()" id="sendBtn">Send</button>
             </div>
             <div id="lockedMsg" class="locked-msg">Chat is locked. Revise your code and upload again.</div>
+            <div style="margin-top:12px;">
+                <button onclick="document.getElementById('reuploadInput').click()" style="background:#4caf50; font-size:12px; padding:6px 14px;">I figured it out — Upload new version</button>
+                <input type="file" id="reuploadInput" accept=".json,.sb3" style="display:none">
+            </div>
             <div id="reuploadSection" style="display:none; margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
                 <div style="font-size:13px; font-weight:600; margin-bottom:8px;">How did you improve? Upload your revised project:</div>
-                <input type="file" id="reuploadInput" accept=".json,.sb3" style="display:none">
-                <button onclick="document.getElementById('reuploadInput').click()" style="background:#4caf50;">Upload Revised Project</button>
                 <div id="reuploadResult" style="margin-top:12px; font-size:12px;"></div>
             </div>
         </div>

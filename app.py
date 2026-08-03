@@ -255,7 +255,10 @@ def start():
             summary = (
                 f"{build_project_summary(targets, scores)}\n"
                 f"Low-scoring dimensions: {dims_text}.\n"
-                f"The student just uploaded their project. Ask your opening Socratic question based on this specific project."
+                f"The student just uploaded their project for the first time. "
+                f"Give a friendly 2-sentence summary of what their project does, then list exactly 3 specific things they could improve, "
+                f"each tied to one of the low-scoring dimensions. Number them 1, 2, 3. "
+                f"End with one sentence inviting them to pick one to work on or ask a question. Do NOT ask a Socratic question yet."
             )
 
         language = request.args.get('language', 'en')
