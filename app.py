@@ -117,12 +117,6 @@ def upload_to_drive(file_path, filename):
         raise Exception('Drive not configured')
     creds = Credentials.from_authorized_user_file(token_path, ['https://www.googleapis.com/auth/drive'])
     service = build('drive', 'v3', credentials=creds)
-    existing = service.files().list(
-        q=f"name='{filename}' and '{folder_id}' in parents and trashed=false",
-        fields='files(id)'
-    ).execute().get('files', [])
-    for f in existing:
-        service.files().delete(fileId=f['id']).execute()
     file_metadata = {'name': filename, 'parents': [folder_id]}
     media = MediaFileUpload(file_path, mimetype='application/octet-stream')
     result = service.files().create(body=file_metadata, media_body=media).execute()
@@ -182,11 +176,12 @@ def upload():
             upload_count = 0
         upload_count += 1
 
-        # save latest .sb3 file to Google Drive (fallback to local)
+        #save to google drive
         session_id = request.args.get('session_id')
         if session_id:
             try:
-                upload_to_drive(file_path, f"{session_id}_project.sb3")
+                timestamp = datetime.now().strftime('%H%M%S')
+                upload_to_drive(file_path, f"{session_id}_{upload_count}_{timestamp}.sb3")
             except Exception as e:
                 print(f"Drive upload failed: {e}")
 
@@ -325,9 +320,7 @@ def chat():
                 f"specifically what Scratch blocks to try to improve each low dimension."
             )
         else:
-            conv_text = "\n".join([f"{m['role']}: {m['message']}" for m in conversation_history])
             summary = (
-                f"Conversation so far:\n{conv_text}\n\n"
                 f"{proj_summary}\n"
                 f"Low-scoring dimensions: {dims_text}.\n"
                 f"Student said: {user_question}"
