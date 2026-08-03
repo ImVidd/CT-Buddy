@@ -264,6 +264,7 @@ def start():
         language = request.args.get('language', 'en')
         from socratic_turn1 import run as ask
         response = ask(summary, low_dims, scores, language=language)
+        conversation_history.append({'role': 'ai', 'message': response})
         return jsonify({'ai_response': response, 'tokens_remaining': tokens_remaining}), 200
     except Exception as e:
         print(f"ERROR in start: {e}")
