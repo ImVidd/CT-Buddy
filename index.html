@@ -512,7 +512,12 @@
                 addMsg('ai', d.ai_response);
                 document.getElementById('tokens').textContent = d.tokens_remaining;
 
-                if (d.tokens_remaining <= 0) {
+                if (d.session_terminated) {
+                    document.getElementById('input').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                    document.getElementById('lockedMsg').textContent = 'This session has been ended due to inappropriate language.';
+                    document.getElementById('lockedMsg').classList.add('active');
+                } else if (d.tokens_remaining <= 0) {
                     document.getElementById('input').disabled = true;
                     document.getElementById('sendBtn').disabled = true;
                     document.getElementById('lockedMsg').classList.add('active');

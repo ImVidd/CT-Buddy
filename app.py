@@ -106,6 +106,15 @@ def check_bad_habits(targets):
 
 PROJECTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'projects')
 
+def contains_bad_language(text):
+    from google import genai as _genai
+    _client = _genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+    result = _client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=f'Does this message contain hate speech, discriminatory language, or serious insults? Reply only "yes" or "no".\n\nMessage: {text}'
+    )
+    return result.text.strip().lower().startswith('yes')
+
 
 def upload_to_drive(file_path, filename):
     from google.oauth2.credentials import Credentials
@@ -269,6 +278,16 @@ def chat():
 
         if not user_question:
             return jsonify({'error': 'No question provided'}), 400
+
+        if contains_bad_language(user_question):
+            conversation_history.clear()
+            current_project.clear()
+            return jsonify({
+                'ai_response': 'This session has been ended due to inappropriate language. Your data will not be saved.',
+                'session_terminated': True,
+                'tokens_remaining': 0,
+                'chatbot_locked': True
+            }), 200
 
         targets = current_project.get('targets', [])
         sprite_names = [t.get('name') for t in targets if not t.get('isStage')]
