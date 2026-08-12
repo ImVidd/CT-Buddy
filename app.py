@@ -110,7 +110,7 @@ def contains_bad_language(text):
     from google import genai as _genai
     _client = _genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
     result = _client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-3.5-flash',
         contents=f'Does this message contain hate speech, discriminatory language, or serious insults? Reply only "yes" or "no".\n\nMessage: {text}'
     )
     return result.text.strip().lower().startswith('yes')

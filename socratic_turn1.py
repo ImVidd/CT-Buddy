@@ -72,7 +72,7 @@ def run(summary, low_dims, scores, final=False, language='en'):
     prompt = build_prompt(summary, low_dims, scores, final=final, language=language)
 
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-3.5-flash',
         contents=prompt,
     )
 
