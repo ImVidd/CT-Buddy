@@ -644,6 +644,9 @@
 
             // restart chat
             if (reuploadCount < MAX_REUPLOADS) {
+                document.getElementById('reuploadSection').style.display = 'none';
+                document.getElementById('skipUploadBtn').style.display = '';
+
                 const divider = document.createElement('div');
                 divider.style.cssText = 'text-align:center; font-size:11px; color:#aaa; margin:12px 0; border-top:1px solid #eee; padding-top:8px;';
                 divider.textContent = `— Attempt ${reuploadCount + 1} —`;
