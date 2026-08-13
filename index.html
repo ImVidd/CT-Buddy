@@ -302,7 +302,7 @@
             </div>
             <div id="lockedMsg" class="locked-msg">Chat is locked. Revise your code and upload again.</div>
             <div style="margin-top:12px;">
-                <button onclick="document.getElementById('reuploadInput').click()" style="background:#4caf50; font-size:12px; padding:6px 14px;">Skip and upload new version</button>
+                <button id="skipUploadBtn" onclick="document.getElementById('reuploadInput').click()" style="background:#4caf50; font-size:12px; padding:6px 14px;">Skip and upload new version</button>
                 <input type="file" id="reuploadInput" accept=".json,.sb3" style="display:none">
             </div>
             <div id="reuploadSection" style="display:none; margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
@@ -541,6 +541,7 @@
                     document.getElementById('input').disabled = true;
                     document.getElementById('sendBtn').disabled = true;
                     document.getElementById('lockedMsg').classList.add('active');
+                    document.getElementById('skipUploadBtn').style.display = 'none';
                     document.getElementById('reuploadSection').style.display = 'block';
                     saveSession();
                     setTimeout(() => document.getElementById('reuploadSection').scrollIntoView({ behavior: 'smooth' }), 300);
@@ -597,36 +598,36 @@
             const newScores = data.dr_scratch_scores;
             allScores.push(newScores);
 
-            // rebuild comparison table
-            const dims = ['Logic', 'Abstraction', 'Data Representation', 'Math Operators',
-                          'Parallelism', 'Synchronization', 'Flow Control', 'User Interactivity', 'Motion Operators'];
-            const labels = ['Initial', 'Attempt 1', 'Attempt 2', 'Attempt 3'];
-            const headerCols = ['Initial', ...allScores.map((_, i) => `Attempt ${i+1}`)];
-
-            let html = '<div style="font-weight:600; margin-bottom:6px;">Score Comparison</div>';
-            html += '<table style="font-size:12px; width:100%; border-collapse:collapse;">';
-            html += '<tr><td></td>' + headerCols.map(l => `<td style="color:#888;padding:3px 6px">${l}</td>`).join('') + '<td style="color:#888;padding:3px 6px">Change</td></tr>';
-            dims.forEach(dim => {
-                const base = initialScores[dim] ?? 0;
-                const latest = newScores[dim] ?? 0;
-                const diff = latest - base;
-                const color = diff > 0 ? '#4caf50' : diff < 0 ? '#e53935' : '#888';
-                const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '—';
-                const attemptCols = allScores.map(s => `<td style="padding:3px 6px">${s[dim] ?? 0}/4</td>`).join('');
-                html += `<tr>
-                    <td style="padding:3px 6px 3px 0">${dim}</td>
-                    <td style="padding:3px 6px">${base}/4</td>
-                    ${attemptCols}
-                    <td style="padding:3px 6px; color:${color}; font-weight:600">${arrow} ${Math.abs(diff)}</td>
-                </tr>`;
-            });
-            html += '</table>';
-            resultEl.innerHTML = html;
-
-            // lock re-upload after 3 attempts
+            // lock re-upload after 3 attempts and show full comparison table
             if (reuploadCount >= MAX_REUPLOADS) {
                 document.getElementById('reuploadSection').querySelector('button').style.display = 'none';
-                resultEl.insertAdjacentHTML('beforeend', '<div style="margin-top:10px; font-size:12px; color:#888;">You have used all 3 revision attempts.</div>');
+
+                const dims = ['Logic', 'Abstraction', 'Data Representation', 'Math Operators',
+                              'Parallelism', 'Synchronization', 'Flow Control', 'User Interactivity', 'Motion Operators'];
+                const headerCols = ['Initial', ...allScores.map((_, i) => `Attempt ${i+1}`)];
+
+                let html = '<div style="font-weight:600; margin-bottom:6px;">Score Comparison</div>';
+                html += '<table style="font-size:12px; width:100%; border-collapse:collapse;">';
+                html += '<tr><td></td>' + headerCols.map(l => `<td style="color:#888;padding:3px 6px">${l}</td>`).join('') + '<td style="color:#888;padding:3px 6px">Change</td></tr>';
+                dims.forEach(dim => {
+                    const base = initialScores[dim] ?? 0;
+                    const latest = newScores[dim] ?? 0;
+                    const diff = latest - base;
+                    const color = diff > 0 ? '#4caf50' : diff < 0 ? '#e53935' : '#888';
+                    const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '—';
+                    const attemptCols = allScores.map(s => `<td style="padding:3px 6px">${s[dim] ?? 0}/4</td>`).join('');
+                    html += `<tr>
+                        <td style="padding:3px 6px 3px 0">${dim}</td>
+                        <td style="padding:3px 6px">${base}/4</td>
+                        ${attemptCols}
+                        <td style="padding:3px 6px; color:${color}; font-weight:600">${arrow} ${Math.abs(diff)}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                html += '<div style="margin-top:10px; font-size:12px; color:#888;">You have used all 3 revision attempts.</div>';
+                resultEl.innerHTML = html;
+            } else {
+                resultEl.textContent = '';
             }
 
             if (sessionFilename) {
