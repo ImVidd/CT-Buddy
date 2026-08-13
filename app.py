@@ -13,7 +13,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Render stores secret files at /etc/secrets/
-CREDENTIALS_PATH = '/etc/secrets/credentials.json' if os.path.exists('/etc/secrets/credentials.json') else os.getenv('GOOGLE_CREDENTIALS', 'credentials.json')
+CREDENTIALS_PATH = '/etc/secrets2/credentials.json' if os.path.exists('/etc/secrets2/credentials.json') else os.getenv('GOOGLE_CREDENTIALS', 'credentials.json')
 
 TRIGGER_OPCODES = [
     'event_whenflagclicked', 'event_whenbroadcastreceived',
