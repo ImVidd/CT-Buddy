@@ -573,7 +573,8 @@
                         timestamp: new Date().toISOString(),
                         initial_scores: initialScores,
                         messages: messageLog,
-                        ratings: ratings
+                        ratings: ratings,
+                        attempt: reuploadCount + 1
                     })
                 });
                 const d = await res.json();
@@ -638,7 +639,7 @@
                 fetch(`${API}/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: sessionFilename, after_scores: newScores })
+                    body: JSON.stringify({ filename: sessionFilename, after_scores: newScores, attempt: reuploadCount })
                 });
             }
 

@@ -375,7 +375,7 @@ DIMS = ['Logic', 'Abstraction', 'Data Representation', 'Math Operators',
         'Parallelism', 'Synchronization', 'Flow Control', 'User Interactivity', 'Motion Operators']
 
 CSV_HEADERS = (
-    ['session_id', 'timestamp'] +
+    ['session_id', 'timestamp', 'attempt'] +
     [f'before_{d}' for d in DIMS] +
     [f'after_{d}' for d in DIMS] +
     ['conversation', 'ratings']
@@ -408,7 +408,7 @@ def build_row(data):
     conv = ' | '.join([f"{m['role']}: {m['text']}" for m in messages])
     ratings_str = ', '.join([f"msg{k}:{v}" for k, v in ratings.items() if v])
     return (
-        [data.get('session_id', ''), data.get('timestamp', '')] +
+        [data.get('session_id', ''), data.get('timestamp', ''), data.get('attempt', '')] +
         [before.get(d, '') for d in DIMS] +
         [after.get(d, '') for d in DIMS] +
         [conv, ratings_str]
