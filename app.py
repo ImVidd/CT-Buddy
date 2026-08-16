@@ -117,19 +117,15 @@ def contains_bad_language(text):
 
 
 def upload_to_drive(file_path, filename):
-    from google.oauth2.credentials import Credentials
-    from googleapiclient.discovery import build
-    from googleapiclient.http import MediaFileUpload
-    token_path = '/etc/secrets/drive_token.json' if os.path.exists('/etc/secrets/drive_token.json') else 'drive_token.json'
-    folder_id = os.getenv('GOOGLE_DRIVE_FOLDER_ID')
-    if not os.path.exists(token_path) or not folder_id:
-        raise Exception('Drive not configured')
-    creds = Credentials.from_authorized_user_file(token_path, ['https://www.googleapis.com/auth/drive'])
-    service = build('drive', 'v3', credentials=creds)
-    file_metadata = {'name': filename, 'parents': [folder_id]}
-    media = MediaFileUpload(file_path, mimetype='application/octet-stream')
-    result = service.files().create(body=file_metadata, media_body=media).execute()
-    print(f"Drive upload success: {filename} -> {result.get('id')}")
+    from google.cloud import storage
+    from google.oauth2.service_account import Credentials as SACredentials
+    bucket_name = os.getenv('GCS_BUCKET', 'ct-buddy-sessions')
+    creds = SACredentials.from_service_account_file(CREDENTIALS_PATH)
+    client = storage.Client(credentials=creds, project='ct-buddy-502315')
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(filename)
+    blob.upload_from_filename(file_path)
+    print(f"Cloud Storage upload success: {filename}")
 
 @app.route('/')
 def home():
@@ -385,19 +381,22 @@ CSV_HEADERS = (
 
 
 def append_to_sheets(row_data):
-    creds_path = CREDENTIALS_PATH
-    sheet_id = os.getenv('GOOGLE_SHEET_ID')
-    if not sheet_id:
-        return
-    import gspread
-    from google.oauth2.service_account import Credentials
-    scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    creds = Credentials.from_service_account_file(creds_path, scopes=scopes)
-    gc = gspread.authorize(creds)
-    sh = gc.open_by_key(sheet_id).sheet1
-    if sh.row_count == 0 or sh.cell(1, 1).value != 'timestamp':
-        sh.insert_row(CSV_HEADERS, 1)
-    sh.append_row(row_data)
+    from google.cloud import bigquery
+    from google.oauth2.service_account import Credentials as SACredentials
+    creds = SACredentials.from_service_account_file(CREDENTIALS_PATH)
+    client = bigquery.Client(credentials=creds, project='ct-buddy-502315')
+    table_id = 'ct-buddy-502315.ct_buddy.sessions'
+    row = dict(zip(CSV_HEADERS, row_data))
+    # cast attempt to int
+    if row.get('attempt') != '':
+        try:
+            row['attempt'] = int(row['attempt'])
+        except (ValueError, TypeError):
+            row['attempt'] = None
+    errors = client.insert_rows_json(table_id, [row])
+    if errors:
+        raise Exception(f"BigQuery insert errors: {errors}")
+    print(f"BigQuery insert success")
 
 
 def build_row(data):
