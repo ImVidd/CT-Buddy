@@ -408,10 +408,13 @@ def build_row(data):
     ratings = data.get('ratings') or {}
     conv = ' | '.join([f"{m['role']}: {m['text']}" for m in messages])
     ratings_str = ', '.join([f"msg{k}:{v}" for k, v in ratings.items() if v])
+    def score(d_map, dim):
+        v = d_map.get(dim)
+        return float(v) if v is not None and v != '' else None
     return (
         [data.get('session_id', ''), data.get('timestamp', ''), data.get('attempt', '')] +
-        [before.get(d, '') for d in DIMS] +
-        [after.get(d, '') for d in DIMS] +
+        [score(before, d) for d in DIMS] +
+        [score(after, d) for d in DIMS] +
         [conv, ratings_str]
     )
 
