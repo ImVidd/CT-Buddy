@@ -369,11 +369,13 @@ def chat():
 
 DIMS = ['Logic', 'Abstraction', 'Data Representation', 'Math Operators',
         'Parallelism', 'Synchronization', 'Flow Control', 'User Interactivity', 'Motion Operators']
+DIMS_BQ = ['Logic', 'Abstraction', 'Data_Representation', 'Math_Operators',
+           'Parallelism', 'Synchronization', 'Flow_Control', 'User_Interactivity', 'Motion_Operators']
 
 CSV_HEADERS = (
     ['session_id', 'timestamp', 'attempt'] +
-    [f'before_{d}' for d in DIMS] +
-    [f'after_{d}' for d in DIMS] +
+    [f'before_{d}' for d in DIMS_BQ] +
+    [f'after_{d}' for d in DIMS_BQ] +
     ['conversation', 'ratings']
 )
 
@@ -412,6 +414,7 @@ def build_row(data):
         [after.get(d, '') for d in DIMS] +
         [conv, ratings_str]
     )
+
 
 ############# GOOGLE CREDENTIALS AND SHEET 
 
