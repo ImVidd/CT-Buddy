@@ -386,7 +386,7 @@ def append_to_sheets(row_data):
     from google.cloud import bigquery
     from google.oauth2.service_account import Credentials as SACredentials
     creds = SACredentials.from_service_account_file(CREDENTIALS_PATH)
-    client = bigquery.Client(credentials=creds, project='ct-buddy-502315')
+    client = bigquery.Client(credentials=creds, project='ct-buddy-502315', location='us-central1')
     table_id = 'ct-buddy-502315.ct_buddy.sessions'
     row = dict(zip(CSV_HEADERS, row_data))
     # cast attempt to int
