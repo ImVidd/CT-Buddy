@@ -341,10 +341,14 @@ def chat():
                 f"specifically what Scratch blocks to try to improve each low dimension."
             )
         else:
+            conv_text = "\n".join([f"{m['role']}: {m['message']}" for m in conversation_history])
             summary = (
+                f"Conversation so far:\n{conv_text}\n\n"
                 f"{proj_summary}\n"
                 f"Low-scoring dimensions: {dims_text}.\n"
-                f"Student said: {user_question}"
+                f"The student just said: \"{user_question}\". "
+                f"DO NOT introduce yourself or say 'Hey I'm CT-Buddy' — the conversation is already in progress. "
+                f"Respond directly by building on what was just said."
             )
 
         try:
