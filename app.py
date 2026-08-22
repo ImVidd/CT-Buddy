@@ -426,6 +426,38 @@ def build_row(data):
 ############# GOOGLE CREDENTIALS AND SHEET 
 
 
+def gcs_save_session(filename, data):
+    from google.cloud import storage
+    from google.oauth2.service_account import Credentials as SACredentials
+    creds = SACredentials.from_service_account_file(CREDENTIALS_PATH)
+    client = storage.Client(credentials=creds, project='ct-buddy-502315')
+    bucket = client.bucket(os.getenv('GCS_BUCKET', 'ct-buddy-sessions'))
+    blob = bucket.blob(f"sessions/{filename}.json")
+    blob.upload_from_string(json.dumps(data), content_type='application/json')
+
+def gcs_load_session(filename):
+    from google.cloud import storage
+    from google.oauth2.service_account import Credentials as SACredentials
+    try:
+        creds = SACredentials.from_service_account_file(CREDENTIALS_PATH)
+        client = storage.Client(credentials=creds, project='ct-buddy-502315')
+        bucket = client.bucket(os.getenv('GCS_BUCKET', 'ct-buddy-sessions'))
+        blob = bucket.blob(f"sessions/{filename}.json")
+        return json.loads(blob.download_as_text())
+    except Exception:
+        return {}
+
+def gcs_delete_session(filename):
+    from google.cloud import storage
+    from google.oauth2.service_account import Credentials as SACredentials
+    try:
+        creds = SACredentials.from_service_account_file(CREDENTIALS_PATH)
+        client = storage.Client(credentials=creds, project='ct-buddy-502315')
+        bucket = client.bucket(os.getenv('GCS_BUCKET', 'ct-buddy-sessions'))
+        bucket.blob(f"sessions/{filename}.json").delete()
+    except Exception:
+        pass
+
 @app.route('/save', methods=['POST'])
 def save():
     try:
@@ -433,7 +465,7 @@ def save():
         filename = data.get('filename')
 
         if filename:
-            session = active_sessions.pop(filename, {})
+            session = gcs_load_session(filename)
             session['after_scores'] = data.get('after_scores')
             row = build_row(session)
             try:
@@ -441,9 +473,10 @@ def save():
                 print(f"Sheets update success: {filename}")
             except Exception as e:
                 print(f"Sheets update failed: {e}")
+            gcs_delete_session(filename)
         else:
             filename = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            active_sessions[filename] = data
+            gcs_save_session(filename, data)
             row = build_row(data)
             try:
                 append_to_sheets(row)
