@@ -393,12 +393,10 @@ def append_to_sheets(row_data):
     client = bigquery.Client(credentials=creds, project='ct-buddy-502315', location='us-central1')
     table_id = 'ct-buddy-502315.ct_buddy.sessions'
     row = dict(zip(CSV_HEADERS, row_data))
-    # cast attempt to int
-    if row.get('attempt') != '':
-        try:
-            row['attempt'] = int(row['attempt'])
-        except (ValueError, TypeError):
-            row['attempt'] = None
+    try:
+        row['attempt'] = int(row['attempt']) if row.get('attempt') not in ('', None) else None
+    except (ValueError, TypeError):
+        row['attempt'] = None
     errors = client.insert_rows_json(table_id, [row])
     if errors:
         raise Exception(f"BigQuery insert errors: {errors}")
