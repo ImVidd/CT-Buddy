@@ -62,8 +62,9 @@ def get_scores(json_project):
 
 
 
-def check_bad_habits(targets):
+def check_bad_habits(targets, language='en'):
     issues = []
+    es = language == 'es'
 
     for t in targets:
         if t.get('isStage'):
@@ -84,7 +85,10 @@ def check_bad_habits(targets):
         dupes = {k: c for k, c in Counter(keys).items() if c > 1}
         for key, count in dupes.items():
             label = key.split(':')[1] if ':' in key else key
-            issues.append(f'Sprite "{name}" has {count} scripts triggered by "{label}"')
+            if es:
+                issues.append(f'El sprite "{name}" tiene {count} scripts activados por "{label}"')
+            else:
+                issues.append(f'Sprite "{name}" has {count} scripts triggered by "{label}"')
 
     for t in targets:
         if t.get('isStage'):
@@ -93,13 +97,18 @@ def check_bad_habits(targets):
         tops = [b for b in t.get('blocks', {}).values() if b.get('topLevel', False)]
         dead = [b for b in tops if b.get('opcode') not in TRIGGER_OPCODES]
         if dead:
-            issues.append(f'Sprite "{name}" has {len(dead)} block(s) with no trigger')
+            if es:
+                issues.append(f'El sprite "{name}" tiene {len(dead)} bloque(s) sin activador')
+            else:
+                issues.append(f'Sprite "{name}" has {len(dead)} block(s) with no trigger')
 
-    # same default names as Dr. Scratch
     DEFAULT = ['Sprite', 'Objeto', 'Personatge', 'Figura', 'o actor', 'Personaia']
     for t in targets:
         if not t.get('isStage') and t.get('name') in DEFAULT:
-            issues.append(f'Default name: "{t["name"]}"')
+            if es:
+                issues.append(f'Nombre predeterminado: "{t["name"]}"')
+            else:
+                issues.append(f'Default name: "{t["name"]}"')
 
     return issues
 
@@ -202,8 +211,9 @@ def analyze():
         if not current_project:
             return jsonify({'error': 'No project loaded'}), 400
 
+        language = request.args.get('language', 'en')
         targets = current_project.get('targets', [])
-        issues = check_bad_habits(targets)
+        issues = check_bad_habits(targets, language=language)
         scores = get_scores(current_project)
 
         LLM_DIMS = {'Logic', 'Abstraction', 'Data Representation', 'Math Operators'}

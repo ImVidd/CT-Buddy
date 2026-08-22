@@ -256,45 +256,42 @@
 
         <!-- ##### LOBBY SCREEN ##### -->
         <div id="lobby" style="display:none; padding:8px 0;">
-            <div style="font-size:15px; font-weight:600; margin-bottom:16px;">Welcome to CT-Buddy!</div>
-            <div style="font-size:13px; color:#444; margin-bottom:20px;">Follow these steps to get started:</div>
-            <ol style="font-size:13px; color:#444; line-height:2; padding-left:20px; margin:0 0 24px 0;">
-                <li>Click the button below to download your Scratch project</li>
-                <li>Open it in <a href="https://scratch.mit.edu" target="_blank">Scratch</a> and modify your code</li>
-                <li>Come back here and upload your improved version</li>
-                <li>Chat with CT-Buddy to reflect on what you changed</li>
+            <div id="txt-welcome" style="font-size:15px; font-weight:600; margin-bottom:16px;">Welcome to CT-Buddy!</div>
+            <div id="txt-follow" style="font-size:13px; color:#444; margin-bottom:20px;">Follow these steps to get started:</div>
+            <ol id="txt-steps" style="font-size:13px; color:#444; line-height:2; padding-left:20px; margin:0 0 24px 0;">
+                <li id="txt-step1">Click the button below to download your Scratch project</li>
+                <li id="txt-step2">Open it in <a href="https://scratch.mit.edu" target="_blank">Scratch</a> and modify your code</li>
+                <li id="txt-step3">Come back here and upload your improved version</li>
+                <li id="txt-step4">Chat with CT-Buddy to reflect on what you changed</li>
             </ol>
-            <div style="font-size:12px; color:#999; margin-bottom:16px;">Please do not include your name or any personal information in your project or during the chat.</div>
-            <button onclick="downloadProject()" style="font-size:13px; padding:10px 20px;">Download Your Project</button>
+            <div id="txt-privacy" style="font-size:12px; color:#999; margin-bottom:16px;">Please do not include your name or any personal information in your project or during the chat.</div>
+            <button onclick="downloadProject()" id="txt-download-btn" style="font-size:13px; padding:10px 20px;">Download Your Project</button>
             <div id="readySection" style="display:none; margin-top:20px; border-top:1px solid #eee; padding-top:16px;">
-                <div style="font-size:13px; color:#444; margin-bottom:10px;">Once you've modified your project in Scratch, click below to upload it.</div>
-                <button onclick="startSession()" style="font-size:13px; padding:10px 20px;">I'm ready - Upload my project</button>
+                <div id="txt-modified" style="font-size:13px; color:#444; margin-bottom:10px;">Once you've modified your project in Scratch, click below to upload it.</div>
+                <button onclick="startSession()" id="txt-ready-btn" style="font-size:13px; padding:10px 20px;">I'm ready - Upload my project</button>
             </div>
         </div>
         <!-- END LOBBY SCREEN -->
 
-        
         <div id="mainUI" style="display:none;">
         <div class="dropzone" id="dropzone">
-            Drag file here or click to upload
+            <span id="txt-dropzone">Drag file here or click to upload</span>
             <input type="file" id="fileInput" accept=".json,.sb3">
         </div>
-        
+
         <div id="projectName" class="project-name"></div>
         <div id="loading" class="loading"></div>
         <div id="scores" style="display:none; margin:12px 0;"></div>
-        
+
         <div id="issues" class="issues">
-            <h3>Issues:</h3>
+            <h3 id="txt-issues-title">Issues:</h3>
             <ul id="issuesList"></ul>
-            <p style="font-size: 12px; color: #999; margin-top: 10px;">Fix these and reupload.</p>
-            <!-- ##### SKIP BUTTON  ##### -->
-            <button onclick="skipToChat()" style="margin-top:8px; background:#ffa72c; font-size:12px;">Skip (Chat with CT-Buddy)</button>
-            <!-- ##### END SKIP BUTTON ##### -->
+            <p id="txt-fix" style="font-size: 12px; color: #999; margin-top: 10px;">Fix these and reupload.</p>
+            <button onclick="skipToChat()" id="txt-skip-btn" style="margin-top:8px; background:#ffa72c; font-size:12px;">Skip (Chat with CT-Buddy)</button>
         </div>
-        
+
         <div id="chat" class="chat">
-            <div class="tokens">Attempts: <span id="tokens">3</span>/3</div>
+            <div class="tokens"><span id="txt-attempts">Attempts</span>: <span id="tokens">3</span>/3</div>
             <div class="chat-messages" id="messages"></div>
             <div class="chat-input">
                 <input type="text" id="input" placeholder="Ask a question">
@@ -306,7 +303,7 @@
                 <input type="file" id="reuploadInput" accept=".json,.sb3" style="display:none">
             </div>
             <div id="reuploadSection" style="display:none; margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
-                <div style="font-size:13px; font-weight:600; margin-bottom:8px;">How did you improve? Upload your revised project:</div>
+                <div id="txt-reupload-title" style="font-size:13px; font-weight:600; margin-bottom:8px;">How did you improve? Upload your revised project:</div>
                 <button id="reuploadBtn" onclick="document.getElementById('reuploadInput').click()" style="background:#4caf50; font-size:12px; padding:6px 14px;">Upload revised project</button>
                 <div id="reuploadResult" style="margin-top:12px; font-size:12px;"></div>
             </div>
@@ -324,8 +321,96 @@
 
         let selectedLanguage = 'en';
 
+        const TRANSLATIONS = {
+            en: {
+                welcome: 'Welcome to CT-Buddy!',
+                follow: 'Follow these steps to get started:',
+                step1: 'Click the button below to download your Scratch project',
+                step2: 'Open it in <a href="https://scratch.mit.edu" target="_blank">Scratch</a> and modify your code',
+                step3: 'Come back here and upload your improved version',
+                step4: 'Chat with CT-Buddy to reflect on what you changed',
+                privacy: 'Please do not include your name or any personal information in your project or during the chat.',
+                downloadBtn: 'Download Your Project',
+                modified: "Once you've modified your project in Scratch, click below to upload it.",
+                readyBtn: "I'm ready - Upload my project",
+                dropzone: 'Drag file here or click to upload',
+                issuesTitle: 'Issues:',
+                fix: 'Fix these and reupload.',
+                skipBtn: 'Skip (Chat with CT-Buddy)',
+                attempts: 'Attempts',
+                inputPlaceholder: 'Ask a question',
+                sendBtn: 'Send',
+                lockedDefault: 'Chat is locked. Revise your code and upload again.',
+                skipUploadBtn: 'Skip and upload new version',
+                reuploadTitle: 'How did you improve? Upload your revised project:',
+                reuploadBtn: 'Upload revised project',
+                allUsed: 'You have used all 3 revision attempts.',
+                scoreComparison: 'Score Comparison',
+                initial: 'Initial',
+                attemptLabel: 'Attempt',
+                change: 'Change',
+            },
+            es: {
+                welcome: '¡Bienvenido a CT-Buddy!',
+                follow: 'Sigue estos pasos para comenzar:',
+                step1: 'Haz clic en el botón de abajo para descargar tu proyecto de Scratch',
+                step2: 'Ábrelo en <a href="https://scratch.mit.edu" target="_blank">Scratch</a> y modifica tu código',
+                step3: 'Regresa aquí y sube tu versión mejorada',
+                step4: 'Chatea con CT-Buddy para reflexionar sobre lo que cambiaste',
+                privacy: 'Por favor, no incluyas tu nombre ni ninguna información personal en tu proyecto ni durante el chat.',
+                downloadBtn: 'Descarga tu proyecto',
+                modified: 'Una vez que hayas modificado tu proyecto en Scratch, haz clic abajo para subirlo.',
+                readyBtn: 'Estoy listo/a - Subir mi proyecto',
+                dropzone: 'Arrastra el archivo aquí o haz clic para subir',
+                issuesTitle: 'Problemas:',
+                fix: 'Corrígelos y vuelve a subir.',
+                skipBtn: 'Omitir (Chatear con CT-Buddy)',
+                attempts: 'Intentos',
+                inputPlaceholder: 'Haz una pregunta',
+                sendBtn: 'Enviar',
+                lockedDefault: 'El chat está bloqueado. Revisa tu código y vuelve a subir.',
+                skipUploadBtn: 'Omitir y subir nueva versión',
+                reuploadTitle: '¿Cómo mejoraste? Sube tu proyecto revisado:',
+                reuploadBtn: 'Subir proyecto revisado',
+                allUsed: 'Has usado los 3 intentos de revisión.',
+                scoreComparison: 'Comparación de puntajes',
+                initial: 'Inicial',
+                attemptLabel: 'Intento',
+                change: 'Cambio',
+            }
+        };
+
+        function t(key) {
+            return (TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en)[key] || key;
+        }
+
+        function applyTranslations() {
+            document.getElementById('txt-welcome').textContent = t('welcome');
+            document.getElementById('txt-follow').textContent = t('follow');
+            document.getElementById('txt-step1').innerHTML = t('step1');
+            document.getElementById('txt-step2').innerHTML = t('step2');
+            document.getElementById('txt-step3').innerHTML = t('step3');
+            document.getElementById('txt-step4').innerHTML = t('step4');
+            document.getElementById('txt-privacy').textContent = t('privacy');
+            document.getElementById('txt-download-btn').textContent = t('downloadBtn');
+            document.getElementById('txt-modified').textContent = t('modified');
+            document.getElementById('txt-ready-btn').textContent = t('readyBtn');
+            document.getElementById('txt-dropzone').textContent = t('dropzone');
+            document.getElementById('txt-issues-title').textContent = t('issuesTitle');
+            document.getElementById('txt-fix').textContent = t('fix');
+            document.getElementById('txt-skip-btn').textContent = t('skipBtn');
+            document.getElementById('txt-attempts').textContent = t('attempts');
+            document.getElementById('input').placeholder = t('inputPlaceholder');
+            document.getElementById('sendBtn').textContent = t('sendBtn');
+            document.getElementById('lockedMsg').textContent = t('lockedDefault');
+            document.getElementById('skipUploadBtn').textContent = t('skipUploadBtn');
+            document.getElementById('txt-reupload-title').textContent = t('reuploadTitle');
+            document.getElementById('reuploadBtn').textContent = t('reuploadBtn');
+        }
+
         function setLanguage(lang) {
             selectedLanguage = lang;
+            applyTranslations();
             document.getElementById('langPicker').style.display = 'none';
             document.getElementById('lobby').style.display = 'block';
         }
@@ -361,7 +446,7 @@
                 
                 await new Promise(r => setTimeout(r, 300));
                 
-                const a = await fetch(`${API}/analyze`);
+                const a = await fetch(`${API}/analyze?language=${selectedLanguage}`);
                 const data = await a.json();
 
                 // store scores for backend
@@ -539,7 +624,7 @@
                 if (d.session_terminated) {
                     document.getElementById('input').disabled = true;
                     document.getElementById('sendBtn').disabled = true;
-                    document.getElementById('lockedMsg').textContent = 'This session has been ended due to inappropriate language.';
+                    document.getElementById('lockedMsg').textContent = selectedLanguage === 'es' ? 'Esta sesión ha sido terminada debido a lenguaje inapropiado.' : 'This session has been ended due to inappropriate language.';
                     document.getElementById('lockedMsg').classList.add('active');
                 } else if (d.tokens_remaining <= 0) {
                     document.getElementById('input').disabled = true;
@@ -593,12 +678,12 @@
             reuploadCount++;
 
             const resultEl = document.getElementById('reuploadResult');
-            resultEl.textContent = 'Analyzing revised project...';
+            resultEl.textContent = selectedLanguage === 'es' ? 'Analizando proyecto revisado...' : 'Analyzing revised project...';
 
             const f = new FormData();
             f.append('file', file);
             await fetch(`${API}/upload?reupload=true&session_id=${sessionId}`, { method: 'POST', body: f });
-            const a = await fetch(`${API}/analyze`);
+            const a = await fetch(`${API}/analyze?language=${selectedLanguage}`);
             const data = await a.json();
             const newScores = data.dr_scratch_scores;
             allScores.push(newScores);
@@ -609,11 +694,11 @@
 
                 const dims = ['Logic', 'Abstraction', 'Data Representation', 'Math Operators',
                               'Parallelism', 'Synchronization', 'Flow Control', 'User Interactivity', 'Motion Operators'];
-                const headerCols = ['Initial', ...allScores.map((_, i) => `Attempt ${i+1}`)];
+                const headerCols = [t('initial'), ...allScores.map((_, i) => `${t('attemptLabel')} ${i+1}`)];
 
-                let html = '<div style="font-weight:600; margin-bottom:6px;">Score Comparison</div>';
+                let html = `<div style="font-weight:600; margin-bottom:6px;">${t('scoreComparison')}</div>`;
                 html += '<table style="font-size:12px; width:100%; border-collapse:collapse;">';
-                html += '<tr><td></td>' + headerCols.map(l => `<td style="color:#888;padding:3px 6px">${l}</td>`).join('') + '<td style="color:#888;padding:3px 6px">Change</td></tr>';
+                html += '<tr><td></td>' + headerCols.map(l => `<td style="color:#888;padding:3px 6px">${l}</td>`).join('') + `<td style="color:#888;padding:3px 6px">${t('change')}</td></tr>`;
                 dims.forEach(dim => {
                     const base = initialScores[dim] ?? 0;
                     const latest = newScores[dim] ?? 0;
@@ -629,7 +714,7 @@
                     </tr>`;
                 });
                 html += '</table>';
-                html += '<div style="margin-top:10px; font-size:12px; color:#888;">You have used all 3 revision attempts.</div>';
+                html += `<div style="margin-top:10px; font-size:12px; color:#888;">${t('allUsed')}</div>`;
                 resultEl.innerHTML = html;
             } else {
                 resultEl.textContent = '';
@@ -650,14 +735,14 @@
 
                 const divider = document.createElement('div');
                 divider.style.cssText = 'text-align:center; font-size:11px; color:#aaa; margin:12px 0; border-top:1px solid #eee; padding-top:8px;';
-                divider.textContent = `— Attempt ${reuploadCount + 1} —`;
+                divider.textContent = `— ${t('attemptLabel')} ${reuploadCount + 1} —`;
                 document.getElementById('messages').appendChild(divider);
                 document.getElementById('input').disabled = true;
                 document.getElementById('sendBtn').disabled = true;
                 document.getElementById('lockedMsg').classList.remove('active');
                 const loadingMsg = document.createElement('div');
                 loadingMsg.style.cssText = 'text-align:center; font-size:12px; color:#888; padding:10px;';
-                loadingMsg.textContent = 'CT-Buddy is reviewing your changes...';
+                loadingMsg.textContent = selectedLanguage === 'es' ? 'CT-Buddy está revisando tus cambios...' : 'CT-Buddy is reviewing your changes...';
                 document.getElementById('messages').appendChild(loadingMsg);
                 document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
                 try {
