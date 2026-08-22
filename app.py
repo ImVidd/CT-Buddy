@@ -410,7 +410,7 @@ def build_row(data):
     after = data.get('after_scores') or {}
     messages = data.get('messages') or []
     ratings = data.get('ratings') or {}
-    conv = ' | '.join([f"{m['role']}: {m['text']}" for m in messages])
+    conv = ' | '.join([f"{m['role']}: {m.get('text', m.get('message', ''))}" for m in messages])
     ratings_str = ', '.join([f"msg{k}:{v}" for k, v in ratings.items() if v])
     def score(d_map, dim):
         v = d_map.get(dim)
