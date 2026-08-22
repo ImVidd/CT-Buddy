@@ -446,9 +446,10 @@
                 
                 await new Promise(r => setTimeout(r, 300));
                 
-                const a = await fetch(`${API}/analyze?language=${selectedLanguage}&session_id=${sessionId}`);
+                const a = await fetch(`${API}/analyze?language=${selectedLanguage}`);
                 const data = await a.json();
 
+                // store scores for backend
                 if (data.dr_scratch_scores) {
                     if (!initialScores) {
                         initialScores = data.dr_scratch_scores;
@@ -469,7 +470,7 @@
                     document.getElementById('loading').textContent = 'CT-Buddy is reviewing your project...';
 
                     try {
-                        const r = await fetch(`${API}/start?language=${selectedLanguage}&session_id=${sessionId}`);
+                        const r = await fetch(`${API}/start?language=${selectedLanguage}`);
                         const d = await r.json();
                         document.getElementById('loading').textContent = '';
                         document.getElementById('chat').classList.add('active');
@@ -525,7 +526,7 @@
             document.getElementById('sendBtn').disabled = true;
             document.getElementById('loading').textContent = 'CT-Buddy is reviewing your project...';
             try {
-                const r = await fetch(`${API}/start?language=${selectedLanguage}&session_id=${sessionId}`);
+                const r = await fetch(`${API}/start?language=${selectedLanguage}`);
                 const d = await r.json();
                 document.getElementById('loading').textContent = '';
                 document.getElementById('chat').classList.add('active');
@@ -544,6 +545,7 @@
         let msgId = 0;
         const ratings = {};
         let messageLog = [];
+        let sessionFilename = null;
 
         function addMsg(role, text) {
             const m = document.createElement('div');
@@ -613,31 +615,28 @@
                 const r = await fetch(`${API}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: txt, language: selectedLanguage, session_id: sessionId })
+                    body: JSON.stringify({ question: txt, language: selectedLanguage })
                 });
                 const d = await r.json();
-                if (!r.ok || d.error || !d.ai_response) {
-                    addMsg('ai', selectedLanguage === 'es' ? 'Algo salió mal. Intenta de nuevo.' : 'Something went wrong. Please try again.');
-                } else {
-                    addMsg('ai', d.ai_response);
-                    document.getElementById('tokens').textContent = d.tokens_remaining;
-                    if (d.session_terminated) {
-                        document.getElementById('input').disabled = true;
-                        document.getElementById('sendBtn').disabled = true;
-                        document.getElementById('lockedMsg').textContent = selectedLanguage === 'es' ? 'Esta sesión ha sido terminada debido a lenguaje inapropiado.' : 'This session has been ended due to inappropriate language.';
-                        document.getElementById('lockedMsg').classList.add('active');
-                    } else if (d.tokens_remaining <= 0) {
-                        document.getElementById('input').disabled = true;
-                        document.getElementById('sendBtn').disabled = true;
-                        document.getElementById('lockedMsg').classList.add('active');
-                        document.getElementById('skipUploadBtn').style.display = 'none';
-                        document.getElementById('reuploadSection').style.display = 'block';
-                        saveSession();
-                        setTimeout(() => document.getElementById('reuploadSection').scrollIntoView({ behavior: 'smooth' }), 300);
-                    }
+                addMsg('ai', d.ai_response);
+                document.getElementById('tokens').textContent = d.tokens_remaining;
+
+                if (d.session_terminated) {
+                    document.getElementById('input').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                    document.getElementById('lockedMsg').textContent = selectedLanguage === 'es' ? 'Esta sesión ha sido terminada debido a lenguaje inapropiado.' : 'This session has been ended due to inappropriate language.';
+                    document.getElementById('lockedMsg').classList.add('active');
+                } else if (d.tokens_remaining <= 0) {
+                    document.getElementById('input').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                    document.getElementById('lockedMsg').classList.add('active');
+                    document.getElementById('skipUploadBtn').style.display = 'none';
+                    document.getElementById('reuploadSection').style.display = 'block';
+                    saveSession();
+                    setTimeout(() => document.getElementById('reuploadSection').scrollIntoView({ behavior: 'smooth' }), 300);
                 }
             } catch (e) {
-                addMsg('ai', selectedLanguage === 'es' ? 'Error de conexión. Intenta de nuevo.' : 'Connection error. Please try again.');
+                addMsg('ai', 'Error');
             } finally {
                 document.getElementById('sendBtn').disabled = false;
             }
@@ -651,7 +650,7 @@
 
         async function saveSession() {
             try {
-                await fetch(`${API}/save`, {
+                const res = await fetch(`${API}/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -663,6 +662,8 @@
                         attempt: reuploadCount + 1
                     })
                 });
+                const d = await res.json();
+                sessionFilename = d.filename;
             } catch (e) {
                 console.error('Save failed:', e);
             }
@@ -673,6 +674,7 @@
             const file = e.target.files[0];
             if (!file) return;
             reuploadInput.value = '';
+            await saveSession();
             reuploadCount++;
 
             const resultEl = document.getElementById('reuploadResult');
@@ -681,7 +683,7 @@
             const f = new FormData();
             f.append('file', file);
             await fetch(`${API}/upload?reupload=true&session_id=${sessionId}`, { method: 'POST', body: f });
-            const a = await fetch(`${API}/analyze?language=${selectedLanguage}&session_id=${sessionId}`);
+            const a = await fetch(`${API}/analyze?language=${selectedLanguage}`);
             const data = await a.json();
             const newScores = data.dr_scratch_scores;
             allScores.push(newScores);
@@ -718,11 +720,11 @@
                 resultEl.textContent = '';
             }
 
-            if (newScores) {
-                await fetch(`${API}/save`, {
+            if (sessionFilename) {
+                fetch(`${API}/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: sessionId, after_scores: newScores, attempt: reuploadCount })
+                    body: JSON.stringify({ filename: sessionFilename, after_scores: newScores, attempt: reuploadCount })
                 });
             }
 
@@ -744,7 +746,7 @@
                 document.getElementById('messages').appendChild(loadingMsg);
                 document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
                 try {
-                    const r = await fetch(`${API}/start?language=${selectedLanguage}&session_id=${sessionId}`);
+                    const r = await fetch(`${API}/start?language=${selectedLanguage}`);
                     const d = await r.json();
                     loadingMsg.remove();
                     document.getElementById('input').disabled = false;
